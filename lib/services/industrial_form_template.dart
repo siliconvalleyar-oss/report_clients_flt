@@ -32,6 +32,8 @@ Future<FontConfig> _fc() async {
   try { return await StorageService.getFontConfig(); } catch (_) { return const FontConfig(); }
 }
 
+String _san(String s) => String.fromCharCodes(s.runes.where((r) => r >= 0x20 && r <= 0x7E || r >= 0xA0 && r <= 0xFF));
+
 pw.Widget _bar(String t, {pw.Font? fo}) => pw.Container(
   width: _pw, color: _blue,
   padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -41,7 +43,7 @@ pw.Widget _bar(String t, {pw.Font? fo}) => pw.Container(
 pw.Widget _fld({double? w, double h = 11, String text = ''}) => pw.Container(
   width: w ?? _pw, height: h,
   decoration: pw.BoxDecoration(border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey400, width: _ln))),
-  child: pw.Text(text, style: const pw.TextStyle(fontSize: 6.5), textAlign: pw.TextAlign.start),
+  child: pw.Text(_san(text), style: const pw.TextStyle(fontSize: 6.5), textAlign: pw.TextAlign.start),
 );
 
 pw.Widget _lbl(String t, {double? w, double fs = 5.5, pw.Font? fo}) => pw.Container(
@@ -64,7 +66,7 @@ Future<File> generateIndustrialForm(ReportModel report) async {
 
   Uint8List watermarkBytes;
   try {
-    watermarkBytes = (await rootBundle.load('assets/fondo/fondo_c.png')).buffer.asUint8List();
+    watermarkBytes = (await rootBundle.load('assets/fondo/fondo.png')).buffer.asUint8List();
   } catch (_) {
     watermarkBytes = Uint8List(0);
   }
@@ -206,8 +208,8 @@ Future<File> generateIndustrialForm(ReportModel report) async {
             decoration: i < 2 ? pw.BoxDecoration(border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey300, width: _ln))) : null,
             child: pw.Row(children: [
               pw.Container(width: _pw * 0.06, alignment: pw.Alignment.center, child: pw.Text('${i + 1}', style: pw.TextStyle(fontSize: 5.5, color: PdfColors.grey700, font: n))),
-              pw.Container(width: _pw * 0.36, padding: const pw.EdgeInsets.only(left: 2), child: pw.Text(it?.description ?? '', style: pw.TextStyle(fontSize: 5.5, font: n))),
-              pw.Container(width: _pw * 0.24, padding: const pw.EdgeInsets.only(left: 2), child: pw.Text(it?.model ?? '', style: pw.TextStyle(fontSize: 5.5, font: n))),
+              pw.Container(width: _pw * 0.36, padding: const pw.EdgeInsets.only(left: 2), child: pw.Text(_san(it?.description ?? ''), style: pw.TextStyle(fontSize: 5.5, font: n))),
+              pw.Container(width: _pw * 0.24, padding: const pw.EdgeInsets.only(left: 2), child: pw.Text(_san(it?.model ?? ''), style: pw.TextStyle(fontSize: 5.5, font: n))),
               pw.Container(width: _pw * 0.1, alignment: pw.Alignment.center, child: pw.Text(it != null ? '${it.quantity}' : '', style: pw.TextStyle(fontSize: 5.5, font: n))),
               pw.Container(width: _pw * 0.12, alignment: pw.Alignment.centerRight, padding: const pw.EdgeInsets.only(right: 2), child: pw.Text(it != null && it.price > 0 ? '\$${it.price.toStringAsFixed(2)}' : '', style: pw.TextStyle(fontSize: 5.5, font: n))),
               pw.Container(width: _pw * 0.12, alignment: pw.Alignment.centerRight, padding: const pw.EdgeInsets.only(right: 2), child: pw.Text(it != null && it.total > 0 ? '\$${it.total.toStringAsFixed(2)}' : '', style: pw.TextStyle(fontSize: 5.5, font: n))),
@@ -281,7 +283,7 @@ Future<File> generateIndustrialForm(ReportModel report) async {
                 width: _pw,
                 padding: const pw.EdgeInsets.only(left: 3, top: 1),
                 decoration: i < 5 ? pw.BoxDecoration(border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey300, width: _ln))) : null,
-                child: i == 0 ? pw.Text(observations.isNotEmpty ? observations : '', style: pw.TextStyle(fontSize: 6, font: n)) : pw.SizedBox(),
+                child: i == 0 ? pw.Text(_san(observations), style: pw.TextStyle(fontSize: 6, font: n)) : pw.SizedBox(),
               ),
             )),
           ),
