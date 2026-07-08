@@ -83,6 +83,7 @@ Future<File> generateIndustrialForm(ReportModel report) async {
   final cAddress = companyData['address'] ?? 'Buenos Aires, Argentina';
   final cPhone = companyData['phone'] ?? '';
   final cEmail = companyData['email'] ?? '';
+  final cSubtitle = companyData['subtitle'] ?? 'SERVICIO TÉCNICO ESPECIALIZADO';
 
   pw.ImageProvider logo;
   if (customLogo != null) {
@@ -100,7 +101,7 @@ Future<File> generateIndustrialForm(ReportModel report) async {
   final w4 = (_pw - 18) / 4;
 
   final srvTypes = report.services.map((s) => s.typeName).join(', ');
-  final srvDate = '${report.createdAt.day.toString().padLeft(2, '0')}/${report.createdAt.month.toString().padLeft(2, '0')}/${report.createdAt.year} ${report.createdAt.hour.toString().padLeft(2, '0')}:${report.createdAt.minute.toString().padLeft(2, '0')}';
+  final srvDate = '${report.createdAt.day.toString().padLeft(2, '0')}/${report.createdAt.month.toString().padLeft(2, '0')}/${report.createdAt.year}';
   final observations = report.services.isNotEmpty ? report.services.first.observations : '';
 
   /* ---- header ---- */
@@ -112,11 +113,11 @@ Future<File> generateIndustrialForm(ReportModel report) async {
       pw.SizedBox(width: 8),
       pw.Expanded(child: pw.Center(child: pw.Column(mainAxisAlignment: pw.MainAxisAlignment.center, children: [
         pw.Text(cName.toUpperCase(), style: pw.TextStyle(fontSize: 10, font: _fb('Helvetica'), letterSpacing: 3, color: _blue)),
-        pw.Text('SERVICIO TÉCNICO ESPECIALIZADO', style: pw.TextStyle(fontSize: 5, color: PdfColors.grey500, letterSpacing: 2)),
+        pw.Text(cSubtitle, style: pw.TextStyle(fontSize: 5, color: PdfColors.grey500, letterSpacing: 2)),
       ]))),
       pw.SizedBox(width: 8),
       pw.SizedBox(width: 90, child: pw.Column(mainAxisAlignment: pw.MainAxisAlignment.center, crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
-        pw.Text('${report.createdAt.day.toString().padLeft(2, '0')}/${report.createdAt.month.toString().padLeft(2, '0')}/${report.createdAt.year}   ${report.createdAt.hour.toString().padLeft(2, '0')}:${report.createdAt.minute.toString().padLeft(2, '0')}', style: const pw.TextStyle(fontSize: 6, color: PdfColors.grey700)),
+        pw.Text(srvDate, style: const pw.TextStyle(fontSize: 6, color: PdfColors.grey700)),
         pw.Text(report.serviceLocation.isNotEmpty ? report.serviceLocation : cAddress, style: const pw.TextStyle(fontSize: 5.5, color: PdfColors.grey500)),
       ])),
     ]),
@@ -124,13 +125,15 @@ Future<File> generateIndustrialForm(ReportModel report) async {
 
   /* ---- company data ---- */
   final company = pw.Container(
-    height: 18, width: _pw, padding: const pw.EdgeInsets.symmetric(horizontal: 4),
+    width: _pw, padding: const pw.EdgeInsets.fromLTRB(4, 2, 4, 2),
     decoration: pw.BoxDecoration(border: pw.Border.all(color: _blue, width: 0.6)),
-    child: pw.Row(children: [
-      pw.Text(cName, style: pw.TextStyle(fontSize: 6.5, font: b, color: _blue)),
-      if (cPhone.isNotEmpty) ...[pw.SizedBox(width: 10), pw.Text('Tel: $cPhone', style: pw.TextStyle(fontSize: 6, font: n, color: PdfColors.grey700))],
-      if (cEmail.isNotEmpty) ...[pw.SizedBox(width: 10), pw.Text(cEmail, style: pw.TextStyle(fontSize: 6, font: n, color: PdfColors.grey700))],
-      if (cAddress.isNotEmpty) ...[pw.SizedBox(width: 10), pw.Text(cAddress, style: pw.TextStyle(fontSize: 6, font: n, color: PdfColors.grey700))],
+    child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+      pw.Row(children: [
+        pw.Text(cName, style: pw.TextStyle(fontSize: 6.5, font: b, color: _blue)),
+        if (cPhone.isNotEmpty) ...[pw.SizedBox(width: 10), pw.Text('Tel: $cPhone', style: pw.TextStyle(fontSize: 6, font: n, color: PdfColors.grey700))],
+        if (cEmail.isNotEmpty) ...[pw.SizedBox(width: 10), pw.Text(cEmail, style: pw.TextStyle(fontSize: 6, font: n, color: PdfColors.grey700))],
+      ]),
+      if (cAddress.isNotEmpty) pw.Text('Dirección: $cAddress', style: pw.TextStyle(fontSize: 6, font: n, color: PdfColors.grey600)),
     ]),
   );
 
@@ -169,11 +172,18 @@ Future<File> generateIndustrialForm(ReportModel report) async {
   /* ---- 3. SERVICIO ---- */
   final s3 = _sec('3.  SERVICIO',
     pw.Container(
-      height: 24, width: _pw, padding: const pw.EdgeInsets.fromLTRB(4, 2, 4, 0),
+      height: 34, width: _pw, padding: const pw.EdgeInsets.fromLTRB(4, 2, 4, 0),
       decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey400, width: _ln)),
-      child: pw.Row(children: [
-        _ff('TIPO DE SERVICIO', srvTypes, w: w2, h: 9), pw.SizedBox(width: 6),
-        _ff('FECHA Y HORA', srvDate, w: w2, h: 9),
+      child: pw.Column(children: [
+        pw.Row(children: [
+          _ff('TIPO DE SERVICIO', srvTypes, w: w2, h: 9), pw.SizedBox(width: 6),
+          _ff('FECHA', srvDate, w: w2, h: 9),
+        ]),
+        pw.SizedBox(height: 1),
+        pw.Row(children: [
+          _ff('HORA ENTRADA', report.entryTime, w: w2, h: 9), pw.SizedBox(width: 6),
+          _ff('HORA SALIDA', report.exitTime, w: w2, h: 9),
+        ]),
       ]),
     ), fo: b,
   );
@@ -181,9 +191,9 @@ Future<File> generateIndustrialForm(ReportModel report) async {
   /* ---- 4. PROBLEMA REPORTADO ---- */
   final s4 = _sec('4.  PROBLEMA REPORTADO',
     pw.Container(
-      height: 40, width: _pw, padding: const pw.EdgeInsets.fromLTRB(4, 2, 4, 0),
+      height: 100, width: _pw, padding: const pw.EdgeInsets.fromLTRB(4, 2, 4, 0),
       decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey400, width: _ln)),
-      child: _fld(w: _pw, h: 34, text: report.problemDescription),
+      child: _fld(w: _pw, h: 94, text: report.problemDescription),
     ), fo: b,
   );
 
@@ -201,11 +211,11 @@ Future<File> generateIndustrialForm(ReportModel report) async {
           pw.Container(width: _pw * 0.12, color: _blue, padding: const pw.EdgeInsets.symmetric(vertical: 1.5), child: pw.Text('PRECIO \$', style: pw.TextStyle(fontSize: 5, color: PdfColors.white, font: b), textAlign: pw.TextAlign.center)),
           pw.Container(width: _pw * 0.12, color: _blue, padding: const pw.EdgeInsets.symmetric(vertical: 1.5), child: pw.Text('TOTAL \$', style: pw.TextStyle(fontSize: 5, color: PdfColors.white, font: b), textAlign: pw.TextAlign.center)),
         ]),
-        ...List.generate(3, (i) {
+        ...List.generate(8, (i) {
           final it = i < report.items.length ? report.items[i] : null;
           return pw.Container(
             height: 10,
-            decoration: i < 2 ? pw.BoxDecoration(border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey300, width: _ln))) : null,
+            decoration: i < 7 ? pw.BoxDecoration(border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey300, width: _ln))) : null,
             child: pw.Row(children: [
               pw.Container(width: _pw * 0.06, alignment: pw.Alignment.center, child: pw.Text('${i + 1}', style: pw.TextStyle(fontSize: 5.5, color: PdfColors.grey700, font: n))),
               pw.Container(width: _pw * 0.36, padding: const pw.EdgeInsets.only(left: 2), child: pw.Text(_san(it?.description ?? ''), style: pw.TextStyle(fontSize: 5.5, font: n))),
@@ -241,23 +251,58 @@ Future<File> generateIndustrialForm(ReportModel report) async {
       _bar('8.  FIRMAS — CONFORMIDAD', fo: b),
       pw.SizedBox(height: 1.5),
       pw.Container(
-        height: 34, width: _pw, padding: const pw.EdgeInsets.fromLTRB(4, 2, 4, 0),
+        height: 68, width: _pw, padding: const pw.EdgeInsets.fromLTRB(4, 2, 4, 0),
         decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey400, width: _ln)),
         child: pw.Row(children: [
           pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
             _lbl('FIRMA DEL TÉCNICO', w: w2, fo: b),
-            _fld(w: w2, h: 24),
+            _fld(w: w2, h: 58),
           ]),
           pw.SizedBox(width: 6),
           pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
             _lbl('FIRMA DEL CLIENTE', w: w2, fo: b),
             pw.Row(children: [
-              _fld(w: w2 - 60, h: 24),
-              if (stamp != null) pw.Container(width: 55, height: 24, margin: const pw.EdgeInsets.only(left: 5), child: pw.Image(pw.MemoryImage(stamp), fit: pw.BoxFit.contain)),
+              _fld(w: w2 - 60, h: 58),
+              if (stamp != null) pw.Container(width: 55, height: 58, margin: const pw.EdgeInsets.only(left: 5), child: pw.Image(pw.MemoryImage(stamp), fit: pw.BoxFit.contain)),
             ]),
           ]),
         ]),
       ),
+    ],
+  );
+
+  /* ---- 7. OBSERVACIONES ---- */
+  final s7 = pw.Column(
+    crossAxisAlignment: pw.CrossAxisAlignment.start,
+    children: [
+      _bar('7.  OBSERVACIONES — DIAGNÓSTICO', fo: b),
+      pw.SizedBox(height: 1.5),
+      pw.Container(
+        width: _pw,
+        decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey400, width: _ln)),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Container(
+              width: _pw, height: 36,
+              padding: const pw.EdgeInsets.only(left: 3, top: 1),
+              child: pw.Text(_san(observations), style: pw.TextStyle(fontSize: 6, font: n)),
+            ),
+            if (report.visitedTechnicians.isNotEmpty) ...[
+              pw.Container(
+                width: _pw,
+                padding: const pw.EdgeInsets.fromLTRB(3, 1, 3, 2),
+                decoration: pw.BoxDecoration(border: pw.Border(top: pw.BorderSide(color: PdfColors.grey300, width: _ln))),
+                child: pw.Row(children: [
+                  pw.Text('Técnicos visitantes:  ', style: pw.TextStyle(fontSize: 6, font: b, color: PdfColors.grey700)),
+                  pw.Text(report.visitedTechnicians.join(', '), style: pw.TextStyle(fontSize: 6, font: n)),
+                ]),
+              ),
+            ],
+          ],
+        ),
+      ),
+      pw.SizedBox(height: _gap),
     ],
   );
 
@@ -268,29 +313,7 @@ Future<File> generateIndustrialForm(ReportModel report) async {
       pw.SizedBox(height: 2),
       company,
       pw.SizedBox(height: _gap),
-      s1, s2, s3, s4, s5, s6,
-      /* ---- 7. OBSERVACIONES (expands to fill remaining space) ---- */
-      _bar('7.  OBSERVACIONES — DIAGNÓSTICO', fo: b),
-      pw.SizedBox(height: 1.5),
-      pw.Expanded(
-        child: pw.Container(
-          width: _pw,
-          decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey400, width: _ln)),
-          child: pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: List.generate(6, (i) => pw.Expanded(
-              child: pw.Container(
-                width: _pw,
-                padding: const pw.EdgeInsets.only(left: 3, top: 1),
-                decoration: i < 5 ? pw.BoxDecoration(border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey300, width: _ln))) : null,
-                child: i == 0 ? pw.Text(_san(observations), style: pw.TextStyle(fontSize: 6, font: n)) : pw.SizedBox(),
-              ),
-            )),
-          ),
-        ),
-      ),
-      pw.SizedBox(height: _gap),
-      s8,
+      s1, s2, s3, s4, s5, s6, s7, s8,
     ],
   );
 

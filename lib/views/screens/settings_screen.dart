@@ -19,6 +19,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _companyAddressController = TextEditingController();
   final _companyPhoneController = TextEditingController();
   final _companyEmailController = TextEditingController();
+  final _companySubtitleController = TextEditingController();
   String _selectedLanguage = 'es';
   Uint8List? _stampBytes;
   Uint8List? _logoBytes;
@@ -52,6 +53,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _companyAddressController.text = data['address'] ?? '';
     _companyPhoneController.text = data['phone'] ?? '';
     _companyEmailController.text = data['email'] ?? '';
+    _companySubtitleController.text = data['subtitle'] ?? 'SERVICIO TÉCNICO ESPECIALIZADO';
   }
 
   Future<void> _saveCompanyData() async {
@@ -61,6 +63,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       phone: _companyPhoneController.text.trim(),
       email: _companyEmailController.text.trim(),
     );
+    await StorageService.saveCompanySubtitle(_companySubtitleController.text.trim());
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Datos de empresa guardados')),
@@ -239,6 +242,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _companyAddressController.dispose();
     _companyPhoneController.dispose();
     _companyEmailController.dispose();
+    _companySubtitleController.dispose();
     super.dispose();
   }
 
@@ -388,6 +392,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             controller: _companyEmailController,
             decoration: const InputDecoration(labelText: 'Correo electrónico', border: OutlineInputBorder()),
             keyboardType: TextInputType.emailAddress,
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _companySubtitleController,
+            decoration: const InputDecoration(labelText: 'Subtítulo del reporte', border: OutlineInputBorder(),
+              hintText: 'SERVICIO TÉCNICO ESPECIALIZADO'),
           ),
 
           const SizedBox(height: 16),

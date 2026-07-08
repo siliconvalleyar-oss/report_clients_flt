@@ -39,6 +39,8 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
   String _selectedPosition = '';
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
+  TimeOfDay _entryTime = TimeOfDay.now();
+  TimeOfDay _exitTime = TimeOfDay.now();
   List<ServiceType> _selectedServices = [];
   String _selectedBrand = '';
   String _selectedModel = '';
@@ -46,6 +48,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
   bool _hasWarranty = false;
   Uint8List? _signatureBytes;
   List<ReportItem> _items = [];
+  Set<String> _visitedTechnicians = {};
 
   List<String> _employees = [];
   List<String> _positions = [];
@@ -77,6 +80,15 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
       _hasWarranty = r.services.any((s) => s.hasWarranty);
       _signatureBytes = r.clientSignature;
       _items = r.items;
+      _entryTime = TimeOfDay(
+        hour: int.tryParse(r.entryTime.split(':')[0]) ?? 0,
+        minute: int.tryParse(r.entryTime.split(':')[1]) ?? 0,
+      );
+      _exitTime = TimeOfDay(
+        hour: int.tryParse(r.exitTime.split(':')[0]) ?? 0,
+        minute: int.tryParse(r.exitTime.split(':')[1]) ?? 0,
+      );
+      _visitedTechnicians = r.visitedTechnicians.toSet();
     }
     _loadLists();
   }
@@ -119,6 +131,16 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
   Future<void> _pickTime() async {
     final time = await showTimePicker(context: context, initialTime: _selectedTime);
     if (time != null) setState(() => _selectedTime = time);
+  }
+
+  Future<void> _pickEntryTime(BuildContext ctx) async {
+    final time = await showTimePicker(context: ctx, initialTime: _entryTime);
+    if (time != null) setState(() => _entryTime = time);
+  }
+
+  Future<void> _pickExitTime(BuildContext ctx) async {
+    final time = await showTimePicker(context: ctx, initialTime: _exitTime);
+    if (time != null) setState(() => _exitTime = time);
   }
 
   void _onServicesChanged(List<ServiceType> services) => setState(() => _selectedServices = services);
@@ -167,6 +189,9 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
       serviceCost: double.tryParse(_serviceCostController.text.trim()) ?? 0.0,
       expenses: double.tryParse(_expensesController.text.trim()) ?? 0.0,
       items: _items,
+      entryTime: '${_entryTime.hour.toString().padLeft(2, '0')}:${_entryTime.minute.toString().padLeft(2, '0')}',
+      exitTime: '${_exitTime.hour.toString().padLeft(2, '0')}:${_exitTime.minute.toString().padLeft(2, '0')}',
+      visitedTechnicians: _visitedTechnicians.toList(),
       createdAt: DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, _selectedTime.hour, _selectedTime.minute),
     );
 
@@ -238,6 +263,21 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
                 onChanged: (v) => setState(() => _selectedPosition = v ?? ''),
               ),
 
+              const SizedBox(height: 16),
+              _sectionTitle('Técnicos Visitantes'),
+              const SizedBox(height: 8),
+              if (_employees.isEmpty)
+                const Text('No hay empleados registrados. Agréguelos en Configuración.',
+                  style: TextStyle(fontSize: 12, color: Colors.grey))
+              else
+                Wrap(spacing: 6, runSpacing: 4, children: _employees.map((e) => FilterChip(
+                  label: Text(e, style: const TextStyle(fontSize: 12)),
+                  selected: _visitedTechnicians.contains(e),
+                  onSelected: (v) => setState(() {
+                    if (v) { _visitedTechnicians.add(e); } else { _visitedTechnicians.remove(e); }
+                  }),
+                )).toList()),
+
               const SizedBox(height: 24),
               _sectionTitle('Tipo de Servicio'),
               ServiceCheckbox(onChanged: _onServicesChanged),
@@ -253,6 +293,18 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
                 Expanded(child: OutlinedButton.icon(
                   onPressed: _pickTime, icon: const Icon(Icons.access_time),
                   label: Text(_selectedTime.format(context)),
+                )),
+              ]),
+              const SizedBox(height: 12),
+              Row(children: [
+                Expanded(child: OutlinedButton.icon(
+                  onPressed: () => _pickEntryTime(context), icon: const Icon(Icons.login),
+                  label: Text('Entrada: ${_entryTime.format(context)}'),
+                )),
+                const SizedBox(width: 12),
+                Expanded(child: OutlinedButton.icon(
+                  onPressed: () => _pickExitTime(context), icon: const Icon(Icons.logout),
+                  label: Text('Salida: ${_exitTime.format(context)}'),
                 )),
               ]),
 

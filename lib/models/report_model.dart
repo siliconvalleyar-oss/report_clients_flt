@@ -20,6 +20,9 @@ class ReportModel {
   final double serviceCost;
   final double expenses;
   final List<ReportItem> items;
+  final String entryTime;
+  final String exitTime;
+  final List<String> visitedTechnicians;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -39,6 +42,9 @@ class ReportModel {
     this.serviceCost = 0.0,
     this.expenses = 0.0,
     this.items = const [],
+    this.entryTime = '',
+    this.exitTime = '',
+    this.visitedTechnicians = const [],
     DateTime? createdAt,
     DateTime? updatedAt,
   })  : createdAt = createdAt ?? DateTime.now(),
@@ -62,6 +68,9 @@ class ReportModel {
         serviceCost = 0.0,
         expenses = 0.0,
         items = [],
+        entryTime = '',
+        exitTime = '',
+        visitedTechnicians = [],
         createdAt = DateTime.now(),
         updatedAt = DateTime.now();
 
@@ -90,6 +99,9 @@ class ReportModel {
               ?.map((e) => ReportItem.fromMap(Map<String, dynamic>.from(e)))
               .toList() ??
           [],
+      entryTime: map['entryTime'] ?? '',
+      exitTime: map['exitTime'] ?? '',
+      visitedTechnicians: (map['visitedTechnicians'] as List<dynamic>?)?.cast<String>() ?? [],
       createdAt: DateTime.tryParse(map['createdAt'] ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(map['updatedAt'] ?? '') ?? DateTime.now(),
     );
@@ -112,6 +124,9 @@ class ReportModel {
       'serviceCost': serviceCost,
       'expenses': expenses,
       'items': items.map((e) => e.toMap()).toList(),
+      'entryTime': entryTime,
+      'exitTime': exitTime,
+      'visitedTechnicians': visitedTechnicians,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
@@ -133,6 +148,9 @@ class ReportModel {
     double? serviceCost,
     double? expenses,
     List<ReportItem>? items,
+    String? entryTime,
+    String? exitTime,
+    List<String>? visitedTechnicians,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -152,6 +170,9 @@ class ReportModel {
       serviceCost: serviceCost ?? this.serviceCost,
       expenses: expenses ?? this.expenses,
       items: items ?? this.items,
+      entryTime: entryTime ?? this.entryTime,
+      exitTime: exitTime ?? this.exitTime,
+      visitedTechnicians: visitedTechnicians ?? this.visitedTechnicians,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

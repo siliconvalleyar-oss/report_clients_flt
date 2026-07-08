@@ -184,7 +184,12 @@ class StorageService {
       'address': box.get('companyAddress', defaultValue: '') as String,
       'phone': box.get('companyPhone', defaultValue: '') as String,
       'email': box.get('companyEmail', defaultValue: '') as String,
+      'subtitle': box.get('companySubtitle', defaultValue: 'SERVICIO TÉCNICO ESPECIALIZADO') as String,
     };
+  }
+
+  static Future<void> saveCompanySubtitle(String subtitle) async {
+    await (await _box).put('companySubtitle', subtitle);
   }
 
   static Future<FontConfig> getFontConfig() async {
