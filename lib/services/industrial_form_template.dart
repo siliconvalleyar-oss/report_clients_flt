@@ -105,36 +105,32 @@ Future<File> generateIndustrialForm(ReportModel report) async {
   final observations = report.services.isNotEmpty ? report.services.first.observations : '';
 
   /* ---- QR company data ---- */
-  final companyQrData = _san('EMPRESA: $cName\nDIR: $cAddress\nTEL: $cPhone\nEMAIL: $cEmail');
+  final companyQrData = 'EMPRESA: $cName\nDIRECCIÓN: $cAddress\nTEL: $cPhone\nEMAIL: $cEmail';
 
   /* ---- QR report data ---- */
-  final reportQrData = _san(
-    'REPORTE: ${report.id}\n'
+  final reportQrData =
+    'REPORTE N°: ${report.id}\n'
     'CLIENTE: ${report.client.name}\n'
     'EMAIL: ${report.client.email}\n'
     'TEL: ${report.client.phone}\n'
     'FECHA: $srvDate\n'
     'EQUIPO: ${report.equipment.brand} ${report.equipment.model}\n'
-    'TÉCNICO: ${report.employeeName}',
-  );
+    'TÉCNICO: ${report.employeeName}';
 
   /* ---- header ---- */
   final header = pw.Container(
-    height: 36,
+    height: 52,
     decoration: pw.BoxDecoration(border: pw.Border(bottom: pw.BorderSide(color: _blue, width: 1.2))),
     child: pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.center, children: [
-      pw.Container(width: 30, height: 30, child: pw.Image(logo, fit: pw.BoxFit.contain)),
-      pw.SizedBox(width: 8),
       pw.Expanded(child: pw.Center(child: pw.Column(mainAxisAlignment: pw.MainAxisAlignment.center, children: [
         pw.Text(cName.toUpperCase(), style: pw.TextStyle(fontSize: 10, font: _fb('Helvetica'), letterSpacing: 3, color: _blue)),
         pw.Text(cSubtitle, style: pw.TextStyle(fontSize: 5, color: PdfColors.grey500, letterSpacing: 2)),
+        pw.SizedBox(height: 2),
+        pw.Text(srvDate, style: const pw.TextStyle(fontSize: 5.5, color: PdfColors.grey600)),
       ]))),
       pw.SizedBox(width: 8),
-      pw.Column(mainAxisAlignment: pw.MainAxisAlignment.center, crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
-        pw.Text(srvDate, style: const pw.TextStyle(fontSize: 6, color: PdfColors.grey700)),
-        pw.Text(report.serviceLocation.isNotEmpty ? report.serviceLocation : cAddress, style: const pw.TextStyle(fontSize: 5.5, color: PdfColors.grey500)),
-      ]),
-      pw.SizedBox(width: 6),
+      pw.Container(width: 52, height: 48, child: pw.Image(logo, fit: pw.BoxFit.contain)),
+      pw.SizedBox(width: 4),
       pw.Container(
         width: 28, height: 28,
         child: pw.BarcodeWidget(
@@ -163,7 +159,7 @@ Future<File> generateIndustrialForm(ReportModel report) async {
   /* ---- 1. CLIENTE ---- */
   final s1 = _sec('1.  DATOS DEL CLIENTE',
     pw.Container(
-      height: 36, width: _pw, padding: const pw.EdgeInsets.fromLTRB(4, 2, 4, 0),
+      height: 48, width: _pw, padding: const pw.EdgeInsets.fromLTRB(4, 2, 4, 0),
       decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey400, width: _ln)),
       child: pw.Column(children: [
         pw.Row(children: [
@@ -175,6 +171,8 @@ Future<File> generateIndustrialForm(ReportModel report) async {
           _ff('TÉCNICO', report.employeeName, w: w2, h: 12), pw.SizedBox(width: 6),
           _ff('CARGO', report.employeePosition, w: w2, h: 12),
         ]),
+        pw.SizedBox(height: 1),
+        _ff('LUGAR DE SERVICIO', report.serviceLocation.isNotEmpty ? report.serviceLocation : cAddress, w: _pw - 8, h: 12),
       ]),
     ), fo: b,
   );
@@ -195,7 +193,7 @@ Future<File> generateIndustrialForm(ReportModel report) async {
   /* ---- 3. SERVICIO ---- */
   final s3 = _sec('3.  SERVICIO',
     pw.Container(
-      height: 34, width: _pw, padding: const pw.EdgeInsets.fromLTRB(4, 2, 4, 0),
+      width: _pw, padding: const pw.EdgeInsets.fromLTRB(4, 2, 4, 0),
       decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey400, width: _ln)),
       child: pw.Column(children: [
         pw.Row(children: [
@@ -207,6 +205,47 @@ Future<File> generateIndustrialForm(ReportModel report) async {
           _ff('HORA ENTRADA', report.entryTime, w: w2, h: 9), pw.SizedBox(width: 6),
           _ff('HORA SALIDA', report.exitTime, w: w2, h: 9),
         ]),
+        pw.SizedBox(height: 3),
+        pw.Container(
+          width: _pw - 8, height: 8, color: PdfColors.grey100,
+          padding: const pw.EdgeInsets.only(left: 2),
+          child: pw.Text('PARTE/S AFECTADA/S', style: pw.TextStyle(fontSize: 5.5, font: b, color: _blue, letterSpacing: 1)),
+        ),
+        pw.SizedBox(height: 2),
+        pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+          pw.Text(' TUBE RX [   ]', style: pw.TextStyle(fontSize: 5.5, font: n)),
+          pw.SizedBox(width: 4),
+          pw.Text('Disparos:', style: pw.TextStyle(fontSize: 5, color: PdfColors.grey600, font: n)),
+          pw.SizedBox(width: 1),
+          pw.Container(width: 28, decoration: pw.BoxDecoration(border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey400, width: _ln)))),
+          pw.SizedBox(width: 4),
+          pw.Text('Hs uso:', style: pw.TextStyle(fontSize: 5, color: PdfColors.grey600, font: n)),
+          pw.SizedBox(width: 1),
+          pw.Container(width: 28, decoration: pw.BoxDecoration(border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey400, width: _ln)))),
+          pw.SizedBox(width: 4),
+          pw.Text('Pacientes:', style: pw.TextStyle(fontSize: 5, color: PdfColors.grey600, font: n)),
+          pw.SizedBox(width: 1),
+          pw.Container(width: 28, decoration: pw.BoxDecoration(border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey400, width: _ln)))),
+        ]),
+        pw.SizedBox(height: 2),
+        pw.Row(children: [
+          pw.Text(' HV TANK [   ]', style: pw.TextStyle(fontSize: 5.5, font: n)),
+          pw.Text(' Cant:', style: pw.TextStyle(fontSize: 5, color: PdfColors.grey600, font: n)),
+          pw.Container(width: 24, decoration: pw.BoxDecoration(border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey400, width: _ln)))),
+          pw.SizedBox(width: 10),
+          pw.Text('DAS [   ]', style: pw.TextStyle(fontSize: 5.5, font: n)),
+          pw.SizedBox(width: 10),
+          pw.Text('GANTRY [   ]', style: pw.TextStyle(fontSize: 5.5, font: n)),
+        ]),
+        pw.SizedBox(height: 2),
+        pw.Row(children: [
+          pw.Text(' PWR SUPPLY [   ]', style: pw.TextStyle(fontSize: 5.5, font: n)),
+          pw.SizedBox(width: 8),
+          pw.Text('COLIMADOR [   ]', style: pw.TextStyle(fontSize: 5.5, font: n)),
+          pw.SizedBox(width: 8),
+          pw.Text('IPG [   ]', style: pw.TextStyle(fontSize: 5.5, font: n)),
+        ]),
+        pw.SizedBox(height: 1),
       ]),
     ), fo: b,
   );
@@ -214,9 +253,9 @@ Future<File> generateIndustrialForm(ReportModel report) async {
   /* ---- 4. PROBLEMA REPORTADO ---- */
   final s4 = _sec('4.  PROBLEMA REPORTADO',
     pw.Container(
-      height: 100, width: _pw, padding: const pw.EdgeInsets.fromLTRB(4, 2, 4, 0),
+      height: 80, width: _pw, padding: const pw.EdgeInsets.fromLTRB(4, 2, 4, 0),
       decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey400, width: _ln)),
-      child: _fld(w: _pw, h: 94, text: report.problemDescription),
+      child: _fld(w: _pw, h: 74, text: report.problemDescription),
     ), fo: b,
   );
 
@@ -304,19 +343,25 @@ Future<File> generateIndustrialForm(ReportModel report) async {
       _bar('8.  FIRMAS — CONFORMIDAD', fo: b),
       pw.SizedBox(height: 1.5),
       pw.Container(
-        height: 68, width: _pw, padding: const pw.EdgeInsets.fromLTRB(4, 2, 4, 0),
+        height: 82, width: _pw, padding: const pw.EdgeInsets.fromLTRB(4, 2, 4, 0),
         decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey400, width: _ln)),
-        child: pw.Row(children: [
+        child: pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
           pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
             _lbl('FIRMA DEL TÉCNICO', w: w2, fo: b),
             _fld(w: w2, h: 58),
+            pw.SizedBox(height: 2),
+            pw.Text(report.employeeName.isNotEmpty ? report.employeeName : '_________________________', style: pw.TextStyle(fontSize: 6, font: b, color: PdfColors.grey800)),
           ]),
           pw.SizedBox(width: 6),
           pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
             _lbl('FIRMA DEL CLIENTE', w: w2, fo: b),
-            pw.Row(children: [
-              _fld(w: w2 - 60, h: 58),
-              if (stamp != null) pw.Container(width: 55, height: 58, margin: const pw.EdgeInsets.only(left: 5), child: pw.Image(pw.MemoryImage(stamp), fit: pw.BoxFit.contain)),
+            pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+              pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+                _fld(w: w2 - 60, h: 58),
+                pw.SizedBox(height: 2),
+                pw.Text(report.client.name.isNotEmpty ? report.client.name : '_________________________', style: pw.TextStyle(fontSize: 6, font: b, color: PdfColors.grey800)),
+              ]),
+              if (stamp != null) pw.Container(width: 55, height: 78, margin: const pw.EdgeInsets.only(left: 5), child: pw.Image(pw.MemoryImage(stamp), fit: pw.BoxFit.contain)),
             ]),
           ]),
         ]),
@@ -337,21 +382,19 @@ Future<File> generateIndustrialForm(ReportModel report) async {
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
             pw.Container(
-              width: _pw, height: 36,
+              width: _pw, height: 80,
               padding: const pw.EdgeInsets.only(left: 3, top: 1),
               child: pw.Text(_san(observations), style: pw.TextStyle(fontSize: 6, font: n)),
             ),
-            if (report.visitedTechnicians.isNotEmpty) ...[
-              pw.Container(
-                width: _pw,
-                padding: const pw.EdgeInsets.fromLTRB(3, 1, 3, 2),
-                decoration: pw.BoxDecoration(border: pw.Border(top: pw.BorderSide(color: PdfColors.grey300, width: _ln))),
-                child: pw.Row(children: [
-                  pw.Text('Técnicos visitantes:  ', style: pw.TextStyle(fontSize: 6, font: b, color: PdfColors.grey700)),
-                  pw.Text(report.visitedTechnicians.join(', '), style: pw.TextStyle(fontSize: 6, font: n)),
-                ]),
-              ),
-            ],
+            pw.Container(
+              width: _pw,
+              padding: const pw.EdgeInsets.fromLTRB(3, 1, 3, 2),
+              decoration: pw.BoxDecoration(border: pw.Border(top: pw.BorderSide(color: PdfColors.grey300, width: _ln))),
+              child: pw.Row(children: [
+                pw.Text('Técnicos visitantes:  ', style: pw.TextStyle(fontSize: 6, font: b, color: PdfColors.grey700)),
+                pw.Text(report.visitedTechnicians.isNotEmpty ? report.visitedTechnicians.join(', ') : '_________________________', style: pw.TextStyle(fontSize: 6, font: n)),
+              ]),
+            ),
           ],
         ),
       ),

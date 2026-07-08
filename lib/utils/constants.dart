@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppConstants {
   static const String appName = 'Electromedicina Pro';
-  static const String version = '1.1.1';
+  static const String version = '1.1.2';
   static const String companyName = 'Electromedicina Pro';
   static const String companyStamp = 'ELECTROMEDICINA PRO S.A.';
 
