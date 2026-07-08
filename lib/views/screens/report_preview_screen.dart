@@ -80,6 +80,35 @@ class ReportPreviewScreen extends StatelessWidget {
               child: Text('ID: ${report.id}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
             ),
             const SizedBox(height: 24),
+            Row(children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => Navigator.pushNamed(context, '/report', arguments: report),
+                  icon: const Icon(Icons.edit),
+                  label: const Text('Editar reporte'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    context.read<ReportController>().resetReport();
+                    Navigator.pushNamed(context, '/report');
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Nuevo reporte'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppConstants.primaryColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+            ]),
+            const SizedBox(height: 12),
             ExportButtons(report: report),
             const SizedBox(height: 32),
           ],

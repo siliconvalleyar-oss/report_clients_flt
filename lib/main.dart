@@ -4,9 +4,11 @@ import 'controllers/report_controller.dart';
 import 'controllers/export_controller.dart';
 import 'controllers/validation_controller.dart';
 import 'controllers/theme_controller.dart';
+import 'models/report_model.dart';
 import 'services/storage_service.dart';
 import 'utils/themes.dart';
 import 'views/screens/home_screen.dart';
+import 'views/screens/splash_screen.dart';
 import 'views/screens/report_form_screen.dart';
 import 'views/screens/history_screen.dart';
 import 'views/screens/settings_screen.dart';
@@ -38,9 +40,13 @@ class ReportClientsApp extends StatelessWidget {
             theme: AppThemes.lightTheme,
             darkTheme: AppThemes.darkTheme,
             themeMode: themeController.themeMode,
-            home: const HomeScreen(),
+            home: const SplashScreen(),
             routes: {
-              '/report': (_) => const ReportFormScreen(),
+              '/report': (ctx) {
+                final args = ModalRoute.of(ctx)?.settings.arguments;
+                if (args is ReportModel) return ReportFormScreen(report: args);
+                return const ReportFormScreen();
+              },
               '/history': (_) => const HistoryScreen(),
               '/settings': (_) => const SettingsScreen(),
               '/preview': (_) => const ReportPreviewScreen(),

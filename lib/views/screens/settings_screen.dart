@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import '../../controllers/theme_controller.dart';
 import '../../models/client_model.dart';
 import '../../services/storage_service.dart';
 import '../../utils/constants.dart';
@@ -19,9 +21,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _companyEmailController = TextEditingController();
   String _selectedLanguage = 'es';
   Uint8List? _stampBytes;
+  Uint8List? _logoBytes;
   List<String> _customBrands = [];
   Map<String, List<String>> _customModels = {};
   late FontConfig _fontConfig;
+  bool _watermarkEnabled = true;
+  double _watermarkOpacity = 0.4;
   List<String> _employees = [];
   List<String> _positions = [];
   List<ClientModel> _clientAgenda = [];
@@ -32,8 +37,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _fontConfig = const FontConfig();
     _loadCompanyData();
     _loadStamp();
+    _loadLogo();
     _loadCustomBrands();
     _loadFontConfig();
+    _loadWatermarkSettings();
     _loadEmployees();
     _loadPositions();
     _loadClientAgenda();
@@ -66,6 +73,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (mounted) setState(() => _stampBytes = bytes);
   }
 
+  Future<void> _loadLogo() async {
+    final bytes = await StorageService.getLogoImage();
+    if (mounted) setState(() => _logoBytes = bytes);
+  }
+
+  Future<void> _pickLogo() async {
+    final picker = ImagePicker();
+    final xFile = await picker.pickImage(source: ImageSource.gallery, maxWidth: 400, maxHeight: 400);
+    if (xFile == null) return;
+    final bytes = await xFile.readAsBytes();
+    await StorageService.saveLogoImage(bytes);
+    if (mounted) {
+      setState(() => _logoBytes = bytes);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Logo guardado correctamente')),
+      );
+    }
+  }
+
+  Future<void> _removeLogo() async {
+    await StorageService.clearLogoImage();
+    if (mounted) {
+      setState(() => _logoBytes = null);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Logo eliminado')),
+      );
+    }
+  }
+
   Future<void> _loadCustomBrands() async {
     final brands = await StorageService.getCustomBrands();
     final Map<String, List<String>> models = {};
@@ -81,6 +117,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadFontConfig() async {
     final config = await StorageService.getFontConfig();
     if (mounted) setState(() => _fontConfig = config);
+  }
+
+  Future<void> _loadWatermarkSettings() async {
+    final settings = await StorageService.loadWatermarkSettings();
+    if (mounted) setState(() {
+      _watermarkEnabled = settings['enabled'] as bool;
+      _watermarkOpacity = (settings['opacity'] as num).toDouble();
+    });
+  }
+
+  Future<void> _saveWatermarkSettings() async {
+    await StorageService.saveWatermarkSettings(enabled: _watermarkEnabled, opacity: _watermarkOpacity);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Configuración de fondo guardada')),
+      );
+    }
   }
 
   Future<void> _loadEmployees() async {
@@ -352,6 +405,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
 
           const SizedBox(height: 32),
+          _sectionTitle('Logo de la Empresa'),
+          const SizedBox(height: 12),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  if (_logoBytes != null) ...[
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.memory(_logoBytes!, height: 80, fit: BoxFit.contain),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _pickLogo,
+                          icon: const Icon(Icons.image),
+                          label: Text(_logoBytes != null ? 'Cambiar logo' : 'Cargar logo'),
+                        ),
+                      ),
+                      if (_logoBytes != null) ...[
+                        const SizedBox(width: 12),
+                        IconButton(
+                          onPressed: _removeLogo,
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          tooltip: 'Eliminar logo',
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  const Text('El logo se mostrará en el encabezado del PDF', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 32),
           _sectionTitle('Sello de la Empresa'),
           const SizedBox(height: 12),
           Card(
@@ -387,6 +481,67 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 8),
                   const Text('El sello se mostrará al final del PDF', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 32),
+          _sectionTitle('Fondo del Reporte PDF'),
+          const SizedBox(height: 12),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.image, color: AppConstants.primaryColor),
+                      const SizedBox(width: 12),
+                      const Expanded(child: Text('Mostrar imagen de fondo', style: TextStyle(fontSize: 16))),
+                      Switch(
+                        value: _watermarkEnabled,
+                        onChanged: (v) => setState(() => _watermarkEnabled = v),
+                        activeColor: AppConstants.primaryColor,
+                      ),
+                    ],
+                  ),
+                  if (_watermarkEnabled) ...[
+                    const SizedBox(height: 16),
+                    const Text('Opacidad', style: TextStyle(fontSize: 14)),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Text('0%', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                        Expanded(
+                          child: Slider(
+                            value: _watermarkOpacity,
+                            min: 0.0,
+                            max: 1.0,
+                            divisions: 100,
+                            activeColor: AppConstants.primaryColor,
+                            onChanged: (v) => setState(() => _watermarkOpacity = v),
+                          ),
+                        ),
+                        const Text('100%', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                      ],
+                    ),
+                    Center(child: Text('${(_watermarkOpacity * 100).round()}%', style: const TextStyle(fontSize: 12, color: Colors.grey))),
+                    const SizedBox(height: 8),
+                  ],
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _saveWatermarkSettings,
+                      icon: const Icon(Icons.save),
+                      label: const Text('Guardar configuración de fondo'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppConstants.primaryColor,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -601,6 +756,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ),
                 )),
+
+          const SizedBox(height: 32),
+          _sectionTitle('Apariencia'),
+          const SizedBox(height: 12),
+          Consumer<ThemeController>(
+            builder: (_, tc, __) => Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Icon(tc.themeMode == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode, color: AppConstants.primaryColor),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Modo oscuro', style: TextStyle(fontSize: 16)),
+                          Text(tc.themeMode == ThemeMode.dark ? 'Azul oscuro activado' : 'Azul oscuro desactivado',
+                            style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                        ],
+                      ),
+                    ),
+                    Switch(
+                      value: tc.themeMode == ThemeMode.dark,
+                      onChanged: (_) => tc.toggleTheme(),
+                      activeColor: AppConstants.primaryColor,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
 
           const SizedBox(height: 32),
           _sectionTitle('Idioma'),

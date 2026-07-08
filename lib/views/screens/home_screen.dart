@@ -33,12 +33,6 @@ class HomeScreen extends StatelessWidget {
                   _MenuButton(icon: Icons.history, label: 'Historial', color: Colors.teal, onTap: () => Navigator.pushNamed(context, '/history')),
                   _MenuButton(icon: Icons.folder_copy, label: 'Plantillas', color: Colors.blueGrey, onTap: () => _showComingSoon(context, 'Plantillas')),
                   _MenuButton(icon: Icons.settings, label: 'Configuración', color: Colors.orange, onTap: () => Navigator.pushNamed(context, '/settings')),
-                  _MenuButton(
-                    icon: themeController.themeMode == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode,
-                    label: themeController.themeMode == ThemeMode.dark ? 'Modo Claro' : 'Modo Oscuro',
-                    color: Colors.indigo,
-                    onTap: () => context.read<ThemeController>().toggleTheme(),
-                  ),
                   _MenuButton(icon: Icons.info, label: 'Acerca de', color: Colors.purple, onTap: () => _showAbout(context)),
                 ],
               ),

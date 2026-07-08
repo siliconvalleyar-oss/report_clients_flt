@@ -14,7 +14,9 @@ import '../widgets/signature_pad.dart';
 import '../../utils/constants.dart';
 
 class ReportFormScreen extends StatefulWidget {
-  const ReportFormScreen({super.key});
+  final ReportModel? report;
+
+  const ReportFormScreen({super.key, this.report});
 
   @override
   State<ReportFormScreen> createState() => _ReportFormScreenState();
@@ -52,6 +54,30 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
   @override
   void initState() {
     super.initState();
+    final r = widget.report;
+    if (r != null) {
+      _clientNameController.text = r.client.name;
+      _clientAddressController.text = r.client.address;
+      _serviceLocationController.text = r.serviceLocation;
+      _serialNumberController.text = r.equipment.serialNumber;
+      _problemController.text = r.problemDescription;
+      _workDoneController.text = r.workDone;
+      _observationsController.text = r.services.isNotEmpty ? r.services.first.observations : '';
+      _budgetNumberController.text = r.budgetNumber;
+      _serviceCostController.text = r.serviceCost > 0 ? r.serviceCost.toStringAsFixed(2) : '';
+      _expensesController.text = r.expenses > 0 ? r.expenses.toStringAsFixed(2) : '';
+      _selectedEmployee = r.employeeName;
+      _selectedPosition = r.employeePosition;
+      _selectedDate = r.createdAt;
+      _selectedTime = TimeOfDay(hour: r.createdAt.hour, minute: r.createdAt.minute);
+      _selectedServices = r.services.map((s) => s.type).toList();
+      _selectedBrand = r.equipment.brand;
+      _selectedModel = r.equipment.model;
+      _hasSpareParts = r.services.any((s) => s.hasSpareParts);
+      _hasWarranty = r.services.any((s) => s.hasWarranty);
+      _signatureBytes = r.clientSignature;
+      _items = r.items;
+    }
     _loadLists();
   }
 
@@ -116,7 +142,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
 
     final controller = context.read<ReportController>();
     final report = ReportModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: widget.report?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
       client: ClientModel(
         name: _clientNameController.text.trim(),
         address: _clientAddressController.text.trim(),
@@ -161,7 +187,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Nuevo Reporte'),
+        title: Text(widget.report != null ? 'Editar Reporte' : 'Nuevo Reporte'),
         backgroundColor: AppConstants.primaryColor, foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(

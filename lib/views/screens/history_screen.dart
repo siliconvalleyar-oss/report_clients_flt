@@ -86,7 +86,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           itemCount: controller.history.length,
                           itemBuilder: (_, i) => _ReportCard(
                             report: controller.history[i],
-                            onTap: () => Navigator.pushNamed(context, '/preview'),
+                            onTap: () {
+                              context.read<ReportController>().setReport(controller.history[i]);
+                              Navigator.pushNamed(context, '/preview');
+                            },
                             onDelete: () => _deleteReport(controller.history[i].id),
                           ),
                         ),

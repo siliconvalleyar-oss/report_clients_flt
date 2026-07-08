@@ -135,8 +135,15 @@ Estas reglas son obligatorias y deben seguirse en cada modificación del código
 
 ### Git / Versionado
 
-20. **Cada nuevo tag debe actualizar `VERSION`** antes del commit.
-21. **Los mensajes de commit deben seguir conventional commits**: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`.
-22. **No eliminar tags publicados.** Si hay error, crear nuevo tag.
-23. **El tag y `VERSION` siempre deben coincidir** (tag con `v`, `VERSION` sin `v`).
+20. **Todo push debe llevar su tag.** No se pushea sin tag. El tag identifica la versión.
+21. **Flujo de versionado:**
+    a. Obtener el último tag publicado (ej: `v1.0.0`).
+    b. El archivo `VERSION` debe coincidir con ese tag (sin `v`).
+    c. Calcular la siguiente versión: `tag + 0.0.1` (ej: `v1.0.0` → `1.0.1`).
+    d. Actualizar `pubspec.yaml` y `lib/utils/constants.dart` a la nueva versión.
+    e. La app siempre muestra la versión que está corriendo en el splash screen y en Configuración > Acerca de.
+    f. Confirmar cambios y pushear con el nuevo tag.
+22. **Los mensajes de commit deben seguir conventional commits**: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`.
+23. **No eliminar tags publicados.** Si hay error, crear nuevo tag.
+24. **El tag y `VERSION` siempre deben coincidir** (tag con `v`, `VERSION` sin `v`).
 

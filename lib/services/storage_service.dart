@@ -55,9 +55,12 @@ class FontConfig {
 class StorageService {
   static const _settingsBox = 'settings';
   static const _stampKey = 'companyStampImage';
+  static const _logoKey = 'companyLogoImage';
   static const _customBrandsKey = 'customBrands';
   static const _customModelsPrefix = 'customModels_';
   static const _fontConfigKey = 'fontConfig';
+  static const _watermarkOpacityKey = 'watermarkOpacity';
+  static const _watermarkEnabledKey = 'watermarkEnabled';
 
   static Future<void> init() async {
     await Hive.initFlutter();
@@ -89,6 +92,36 @@ class StorageService {
 
   static Future<void> clearStampImage() async {
     await (await _box).delete(_stampKey);
+  }
+
+  static Future<void> saveLogoImage(Uint8List bytes) async {
+    await (await _box).put(_logoKey, bytes.toList());
+  }
+
+  static Future<Uint8List?> getLogoImage() async {
+    final data = (await _box).get(_logoKey);
+    if (data != null && data is List<int>) {
+      return Uint8List.fromList(data);
+    }
+    return null;
+  }
+
+  static Future<void> clearLogoImage() async {
+    await (await _box).delete(_logoKey);
+  }
+
+  static Future<void> saveWatermarkSettings({required bool enabled, required double opacity}) async {
+    final box = await _box;
+    await box.put(_watermarkEnabledKey, enabled);
+    await box.put(_watermarkOpacityKey, opacity);
+  }
+
+  static Future<Map<String, dynamic>> loadWatermarkSettings() async {
+    final box = await _box;
+    return {
+      'enabled': box.get(_watermarkEnabledKey, defaultValue: true) as bool,
+      'opacity': (box.get(_watermarkOpacityKey, defaultValue: 0.4) as num).toDouble(),
+    };
   }
 
   static Future<List<String>> getCustomBrands() async {
