@@ -31,7 +31,8 @@ class ReportPreviewScreen extends StatelessWidget {
             ]),
             const SizedBox(height: 16),
             _buildSection('Empleado', [
-              _item('Técnico', report.employeeName),
+              _item('Nombre', report.employeeName),
+              if (report.employeePosition.isNotEmpty) _item('Cargo', report.employeePosition),
             ]),
             const SizedBox(height: 16),
             _buildSection('Servicio', [
@@ -56,6 +57,15 @@ class ReportPreviewScreen extends StatelessWidget {
               if (report.services.any((s) => s.hasSpareParts)) _item('Repuestos', 'Sí'),
               if (report.services.any((s) => s.hasWarranty)) _item('Garantía', 'Sí'),
             ]),
+            if (report.budgetNumber.isNotEmpty || report.serviceCost > 0 || report.expenses > 0) ...[
+              const SizedBox(height: 16),
+              _buildSection('Presupuesto', [
+                if (report.budgetNumber.isNotEmpty) _item('N° Presupuesto', report.budgetNumber),
+                if (report.serviceCost > 0) _item('Costo del servicio', '\$${report.serviceCost.toStringAsFixed(2)}'),
+                if (report.expenses > 0) _item('Gastos', '\$${report.expenses.toStringAsFixed(2)}'),
+                if (report.totalCost > 0) _item('Total', '\$${report.totalCost.toStringAsFixed(2)}'),
+              ]),
+            ],
             const SizedBox(height: 16),
             if (report.services.isNotEmpty && report.services.first.observations.isNotEmpty)
               _buildSection('Observaciones', [Text(report.services.first.observations)]),

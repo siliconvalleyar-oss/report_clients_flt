@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../controllers/report_controller.dart';
+import '../../controllers/theme_controller.dart';
 import '../../utils/constants.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -8,6 +8,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeController = context.watch<ThemeController>();
     return Scaffold(
       appBar: AppBar(
         title: const Text(AppConstants.appName),
@@ -18,7 +19,7 @@ class HomeScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Image.asset('assets/logo.png', height: 80, errorBuilder: (_, __, ___) => const Icon(Icons.medical_services, size: 80, color: AppConstants.primaryColor)),
+            Image.asset('assets/logo/logo.png', height: 80, errorBuilder: (_, __, ___) => const Icon(Icons.medical_services, size: 80, color: AppConstants.primaryColor)),
             const SizedBox(height: 16),
             const Text('Reportes Técnicos', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 24),
@@ -30,15 +31,33 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   _MenuButton(icon: Icons.description, label: 'Nuevo Reporte', color: AppConstants.primaryColor, onTap: () => Navigator.pushNamed(context, '/report')),
                   _MenuButton(icon: Icons.history, label: 'Historial', color: Colors.teal, onTap: () => Navigator.pushNamed(context, '/history')),
-                  _MenuButton(icon: Icons.folder_copy, label: 'Plantillas', color: Colors.blueGrey, onTap: () {}),
+                  _MenuButton(icon: Icons.folder_copy, label: 'Plantillas', color: Colors.blueGrey, onTap: () => _showComingSoon(context, 'Plantillas')),
                   _MenuButton(icon: Icons.settings, label: 'Configuración', color: Colors.orange, onTap: () => Navigator.pushNamed(context, '/settings')),
-                  _MenuButton(icon: Icons.dark_mode, label: 'Modo Oscuro', color: Colors.indigo, onTap: () {}),
+                  _MenuButton(
+                    icon: themeController.themeMode == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode,
+                    label: themeController.themeMode == ThemeMode.dark ? 'Modo Claro' : 'Modo Oscuro',
+                    color: Colors.indigo,
+                    onTap: () => context.read<ThemeController>().toggleTheme(),
+                  ),
                   _MenuButton(icon: Icons.info, label: 'Acerca de', color: Colors.purple, onTap: () => _showAbout(context)),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showComingSoon(BuildContext context, String feature) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(feature),
+        content: Text('La funcionalidad "$feature" estará disponible próximamente.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cerrar')),
+        ],
       ),
     );
   }

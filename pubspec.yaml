@@ -12,21 +12,29 @@ dependencies:
   provider: ^5.0.0
   pdf: ^3.8.0
   printing: ^5.9.0
-  share_plus: ^4.0.0
+  share_plus: ^10.0.0
   url_launcher: ^6.1.0
   image_picker: ^0.8.5
   signature: ^5.0.0
   hive_flutter: ^1.1.0
   intl: ^0.18.0
+  path_provider: ^2.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+  flutter_launcher_icons: ^0.13.0
+
+flutter_launcher_icons:
+  android: true
+  image_path: "assets/logo/logo.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/logo/logo.png"
 
 flutter:
   uses-material-design: true
   assets:
-    - assets/logo.png
-    - assets/watermark.png
+    - assets/logo/
+    - assets/marca/
     - assets/fonts/

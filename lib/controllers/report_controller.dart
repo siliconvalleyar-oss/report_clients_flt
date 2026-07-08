@@ -69,6 +69,11 @@ class ReportController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setReport(ReportModel report) {
+    _currentReport = report;
+    notifyListeners();
+  }
+
   void resetReport() {
     _currentReport = ReportModel.empty();
     notifyListeners();

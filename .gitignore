@@ -5,7 +5,6 @@ build/
 *.lock
 *.iml
 pubspec.lock
-/android/
 /ios/
 /web/
 /linux/
