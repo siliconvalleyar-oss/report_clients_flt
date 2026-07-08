@@ -83,11 +83,11 @@ class ReportPreviewScreen extends StatelessWidget {
             Row(children: [
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () => Navigator.pushNamed(context, '/report', arguments: report),
-                  icon: const Icon(Icons.edit),
-                  label: const Text('Editar reporte'),
+                  onPressed: () => Navigator.pushNamed(context, '/pdf_viewer'),
+                  icon: const Icon(Icons.picture_as_pdf),
+                  label: const Text('Ver PDF'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
+                    backgroundColor: Colors.redAccent,
                     foregroundColor: Colors.white,
                   ),
                 ),
@@ -95,19 +95,32 @@ class ReportPreviewScreen extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    context.read<ReportController>().resetReport();
-                    Navigator.pushNamed(context, '/report');
-                  },
-                  icon: const Icon(Icons.add),
-                  label: const Text('Nuevo reporte'),
+                  onPressed: () => Navigator.pushNamed(context, '/report', arguments: report),
+                  icon: const Icon(Icons.edit),
+                  label: const Text('Editar'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppConstants.primaryColor,
+                    backgroundColor: Colors.orange,
                     foregroundColor: Colors.white,
                   ),
                 ),
               ),
             ]),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  context.read<ReportController>().resetReport();
+                  Navigator.pushNamed(context, '/report');
+                },
+                icon: const Icon(Icons.add),
+                label: const Text('Nuevo reporte'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppConstants.primaryColor,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ),
             const SizedBox(height: 12),
             ExportButtons(report: report),
             const SizedBox(height: 32),

@@ -104,6 +104,20 @@ Future<File> generateIndustrialForm(ReportModel report) async {
   final srvDate = '${report.createdAt.day.toString().padLeft(2, '0')}/${report.createdAt.month.toString().padLeft(2, '0')}/${report.createdAt.year}';
   final observations = report.services.isNotEmpty ? report.services.first.observations : '';
 
+  /* ---- QR company data ---- */
+  final companyQrData = _san('EMPRESA: $cName\nDIR: $cAddress\nTEL: $cPhone\nEMAIL: $cEmail');
+
+  /* ---- QR report data ---- */
+  final reportQrData = _san(
+    'REPORTE: ${report.id}\n'
+    'CLIENTE: ${report.client.name}\n'
+    'EMAIL: ${report.client.email}\n'
+    'TEL: ${report.client.phone}\n'
+    'FECHA: $srvDate\n'
+    'EQUIPO: ${report.equipment.brand} ${report.equipment.model}\n'
+    'TÉCNICO: ${report.employeeName}',
+  );
+
   /* ---- header ---- */
   final header = pw.Container(
     height: 36,
@@ -116,10 +130,19 @@ Future<File> generateIndustrialForm(ReportModel report) async {
         pw.Text(cSubtitle, style: pw.TextStyle(fontSize: 5, color: PdfColors.grey500, letterSpacing: 2)),
       ]))),
       pw.SizedBox(width: 8),
-      pw.SizedBox(width: 90, child: pw.Column(mainAxisAlignment: pw.MainAxisAlignment.center, crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
+      pw.Column(mainAxisAlignment: pw.MainAxisAlignment.center, crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
         pw.Text(srvDate, style: const pw.TextStyle(fontSize: 6, color: PdfColors.grey700)),
         pw.Text(report.serviceLocation.isNotEmpty ? report.serviceLocation : cAddress, style: const pw.TextStyle(fontSize: 5.5, color: PdfColors.grey500)),
-      ])),
+      ]),
+      pw.SizedBox(width: 6),
+      pw.Container(
+        width: 28, height: 28,
+        child: pw.BarcodeWidget(
+          barcode: pw.Barcode.qrCode(),
+          data: companyQrData,
+          width: 28, height: 28,
+        ),
+      ),
     ]),
   );
 
@@ -244,6 +267,36 @@ Future<File> generateIndustrialForm(ReportModel report) async {
     ), fo: b,
   );
 
+  /* ---- bottom QR ---- */
+  final bottomQr = pw.Container(
+    width: _pw, height: 44,
+    margin: const pw.EdgeInsets.only(top: 4),
+    decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey400, width: _ln)),
+    child: pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.center, children: [
+      pw.Container(
+        width: 42, height: 42, margin: const pw.EdgeInsets.only(left: 4),
+        child: pw.BarcodeWidget(
+          barcode: pw.Barcode.qrCode(),
+          data: reportQrData,
+          width: 42, height: 42,
+        ),
+      ),
+      pw.SizedBox(width: 6),
+      pw.Expanded(
+        child: pw.Column(
+          mainAxisAlignment: pw.MainAxisAlignment.center,
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text('ESCANEAR PARA CONSULTA RÁPIDA', style: pw.TextStyle(fontSize: 5.5, font: b, color: _blue, letterSpacing: 1.2)),
+            pw.SizedBox(height: 1),
+            pw.Text('Reporte: ${report.id}', style: pw.TextStyle(fontSize: 5, font: n, color: PdfColors.grey600)),
+            pw.Text('Cliente: ${report.client.name} — ${srvDate}', style: pw.TextStyle(fontSize: 5, font: n, color: PdfColors.grey600)),
+          ],
+        ),
+      ),
+    ]),
+  );
+
   /* ---- 8. FIRMAS ---- */
   final s8 = pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -313,7 +366,7 @@ Future<File> generateIndustrialForm(ReportModel report) async {
       pw.SizedBox(height: 2),
       company,
       pw.SizedBox(height: _gap),
-      s1, s2, s3, s4, s5, s6, s7, s8,
+      s1, s2, s3, s4, s5, s6, s7, s8, bottomQr,
     ],
   );
 

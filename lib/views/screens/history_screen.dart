@@ -28,25 +28,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     super.dispose();
   }
 
-  void _deleteReport(String id) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Eliminar Reporte'),
-        content: const Text('¿Está seguro de eliminar este reporte?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
-          TextButton(
-            onPressed: () {
-              context.read<ReportController>().deleteReport(id);
-              Navigator.pop(ctx);
-            },
-            child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -88,9 +70,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             report: controller.history[i],
                             onTap: () {
                               context.read<ReportController>().setReport(controller.history[i]);
-                              Navigator.pushNamed(context, '/preview');
+                              Navigator.pushNamed(context, '/pdf_viewer');
                             },
-                            onDelete: () => _deleteReport(controller.history[i].id),
                           ),
                         ),
                       ),
@@ -104,43 +85,27 @@ class _HistoryScreenState extends State<HistoryScreen> {
 class _ReportCard extends StatelessWidget {
   final ReportModel report;
   final VoidCallback onTap;
-  final VoidCallback onDelete;
 
   const _ReportCard({
     required this.report,
     required this.onTap,
-    required this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Dismissible(
-      key: Key(report.id),
-      direction: DismissDirection.endToStart,
-      confirmDismiss: (_) async {
-        onDelete();
-        return false;
-      },
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        color: Colors.red,
-        child: const Icon(Icons.delete, color: Colors.white),
-      ),
-      child: Card(
-        margin: const EdgeInsets.only(bottom: 8),
-        child: ListTile(
-          leading: CircleAvatar(
-            backgroundColor: AppConstants.primaryColor.withAlpha(30),
-            child: const Icon(Icons.description, color: AppConstants.primaryColor),
-          ),
-          title: Text(report.client.name, style: const TextStyle(fontWeight: FontWeight.w600)),
-          subtitle: Text(
-            '${report.equipment.brand} ${report.equipment.model} - ${report.createdAt.day}/${report.createdAt.month}/${report.createdAt.year}',
-          ),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: onTap,
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: AppConstants.primaryColor.withAlpha(30),
+          child: const Icon(Icons.picture_as_pdf, color: AppConstants.primaryColor),
         ),
+        title: Text(report.client.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+        subtitle: Text(
+          '${report.equipment.brand} ${report.equipment.model} - ${report.createdAt.day}/${report.createdAt.month}/${report.createdAt.year}',
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: onTap,
       ),
     );
   }

@@ -13,6 +13,7 @@ import 'views/screens/report_form_screen.dart';
 import 'views/screens/history_screen.dart';
 import 'views/screens/settings_screen.dart';
 import 'views/screens/report_preview_screen.dart';
+import 'views/screens/pdf_viewer_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,6 +51,7 @@ class ReportClientsApp extends StatelessWidget {
               '/history': (_) => const HistoryScreen(),
               '/settings': (_) => const SettingsScreen(),
               '/preview': (_) => const ReportPreviewScreen(),
+              '/pdf_viewer': (_) => const PdfViewerScreen(),
             },
           );
         },
